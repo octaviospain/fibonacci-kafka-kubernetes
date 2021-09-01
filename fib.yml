@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: fibonacci-deployment
+  name: fibonacci-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: fibonacci-deployment
+  template:
+    metadata:
+      labels:
+        app: fibonacci-deployment
+    spec:
+      containers:
+      - image: fibonacci-service:latest
+        name: fibonacci-service
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: fibonacci-deployment
+  name: fibonacci-deployment
+spec:
+  ports:
+  - name: fib-8000-8000
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: fibonacci-deployment
+  externalTrafficPolicy: Cluster
+  type: LoadBalancer

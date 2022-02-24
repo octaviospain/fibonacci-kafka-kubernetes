@@ -1,1 +1,3 @@
-rootProject.name = 'fibonacci-service'
+include 'fibonacci-service'
+include 'fibonacci-consumer'
+rootProject.name = 'fibonacci-kafka-kubernetes'

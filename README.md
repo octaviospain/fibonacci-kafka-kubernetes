@@ -1,40 +1,54 @@
 # Fibonacci microservice in kubernetes
 
-Implementation of a simple HTTP server that returns the _n_-th fibonacci sequence number, serving it as a
-GET method at `http://localhost:8000/fib?n=<N>` where `N` is the _n_-th number to obtain;
-then create a Dockerfile that builds an image with the application and deploy it to a Kubernetes load balanced cluster.
+Implementation of a simple HTTP server `fibonacci-service` that returns the _n_-th fibonacci sequence number, serving it as a
+GET method at `http://localhost:8000/fib?n=<N>` where `N` is the _n_-th number to obtain.
+Requests with result are published to a Kafka topic, which is consumed by a java application `fibonacci-consumer`.
+
+### To do
+Create a Dockerfile with Kafka in order to deploy it alongside `fibonacci-service` and `fibonacci-consumer` to a  Kubernetes load balanced cluster.
 
 ## How to make it work
-1. Build application:
+
+### Preconditions:
+
+* Kafka `2.13-3.1.0` is installed at `/opt/kafka_2.13-3.1.0`
+* Java 8 is in the `$PATH`
+
+1. Start Kafka zookeeper and broker
 ```bash
+> cd /opt/kafka_2.13-3.1.0/
+> bin/zookeeper-server-start.sh config/zookeeper.properties
+> bin/kafka-server-start.sh config/server.properties
+```
+2. Create kafka topic
+```bash
+> kafka-topics.sh --bootstrap-server localhost:9092 --topic fibonacci_numbers --create --partitions 3 --replication-factor 1
+```
+
+3. Build application, assuming the project is cloned ad `$HOME/fibonacci-kafka-kubernetes`:
+```bash
+> cd $HOME/fibonacci-kafka-kubernetes
 > ./gradlew build
 ```
-2. Create Docker image:
+
+4. Run the `fibonacci-service`
 ```bash
-> docker build -t fibonacci-service .
-```
-3. Create Kubernetes cluster:
-```bash
-> kubectl apply -f fib.yml
-```
-4. Run the service:
-```bash
-> minikube service fibonacci-deployment
+> java -jar fibonacci-service/build/libs/fibonacci-service-2.jar
 ```
 
-### Stress test
-In order to test the load of the cluster, we can execute a provided script in several terminal sessions
-that will send endless incremental requests given the `URL` and the initial _n_-th number to request.
+5. Run the `fibonacci-consumer` in another console
 ```bash
-> ./stress_test.sh `minikube service fibonacci-deployment --url` 100000
+> java -jar fibonacci-consumer/build/libs/fibonacci-consumer-2.jar 
 ```
 
-We can check the activity of the pods with
+6. User the provided never ending script that makes requests to the service.
 ```bash
-> kubectl logs <POD_NAME> -f
+> ./stress_test.sh localhost:8000 30
 ```
 
-... and rescale the cluster incrementing the number of replicas with
-```bash
-> kubectl scale --replicas=<NUMBER_OF_REPLICAS> deployment/fibonacci-deployment
-```
+Logs showing the computation of the numbers and the consumption of the messages from kafka are shown in the console.
+
+## License
+Copyright (c) 2022 Octavio Calleya Garcia.
+
+This project is free software under GNU GPL version 3 license. The license is here [LICENSE](https://github.com/octaviospain/fibonacci-kafka-kubernetes/tree/master/LICENSE.txt "License")

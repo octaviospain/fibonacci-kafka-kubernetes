@@ -1,6 +1,0 @@
-server:
-  port: 8000
-logging:
-  file:
-    name: fibonacci-service.log
-    path: logs

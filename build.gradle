@@ -1,23 +1,51 @@
+buildscript {
+    ext {
+        springBootVersion = '2.6.3'
+        dependencyManagementPluginVersion = '1.0.11.RELEASE'
+    }
+
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:${dependencyManagementPluginVersion}"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    }
+}
+
 plugins {
-    id 'org.springframework.boot' version '2.5.3'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'java'
+    id 'org.springframework.boot' version "${springBootVersion}"
+    id 'io.spring.dependency-management' version "${dependencyManagementPluginVersion}"
 }
 
-group = 'net.transgressoft'
-version = '1.0'
-sourceCompatibility = '8'
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'org.springframework.boot'
 
-repositories {
-    mavenCentral()
-}
+    version = '2'
+    group = 'net.transgressoft.fibonacci'
+    
+    compileJava   {
+        sourceCompatibility = 8
+        targetCompatibility = 8
+    }
 
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
-}
+    repositories {
+        mavenCentral()
+    }
 
-test {
-    useJUnitPlatform()
+    dependencies {
+        implementation 'org.apache.kafka:kafka-clients:3.1.0'
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+        }
+    } 
 }

@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "bootstrap.servers",
+      "type": "java.lang.String"
+    }
+  ]
+}

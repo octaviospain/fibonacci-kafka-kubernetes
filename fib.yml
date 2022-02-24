@@ -20,6 +20,10 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
+      - image: fibonacci-consumer:latest
+        name: fibonacci-consumer
+        imagePullPolicy: IfNotPresent
+      # TODO Add image containing Kafka
       restartPolicy: Always
 ---
 apiVersion: v1

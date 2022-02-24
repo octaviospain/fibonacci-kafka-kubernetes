@@ -1,0 +1,11 @@
+server:
+  port: 8000
+logging:
+  file:
+    name: fibonacci-service.log
+    path: logs
+
+kafka:
+  bootstrap:
+    servers: 127.0.0.1:9092
+  topic: fibonacci_numbers
